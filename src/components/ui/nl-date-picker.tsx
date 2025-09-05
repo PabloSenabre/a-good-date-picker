@@ -24,29 +24,14 @@ interface NaturalLanguageDatePickerProps {
 }
 
 
-// Auto-detect language based on input content
-const detectLanguage = (input: string): 'es' | 'en' => {
-  const lowerInput = input.toLowerCase().trim();
+// Get chrono locale from browser language
+const getChronoLocale = (navigatorLanguage?: string): string => {
+  const browserLang = navigatorLanguage || (typeof navigator !== 'undefined' ? navigator.language : 'en');
+  const lang = browserLang.split('-')[0];
   
-  // Spanish indicators
-  const spanishKeywords = [
-    'hace', 'próximo', 'próxima', 'pasado', 'pasada', 'dentro', 'hoy', 'ayer', 'mañana',
-    'semana', 'mes', 'año', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo',
-    'anteayer', 'viene', 'que', 'la', 'el', 'una', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis'
-  ];
-  
-  // English indicators  
-  const englishKeywords = [
-    'next', 'last', 'ago', 'in', 'today', 'yesterday', 'tomorrow', 'week', 'month', 'year',
-    'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday',
-    'this', 'after', 'before', 'from', 'now'
-  ];
-  
-  const hasSpanish = spanishKeywords.some(keyword => lowerInput.includes(keyword));
-  const hasEnglish = englishKeywords.some(keyword => lowerInput.includes(keyword));
-  
-  // If both or neither, default to Spanish (since we're adding Spanish support)
-  return hasSpanish && !hasEnglish ? 'es' : hasEnglish && !hasSpanish ? 'en' : 'es';
+  // Supported chrono locales: es, fr, de, pt, en (and others)
+  const supportedLocales = ['es', 'fr', 'de', 'pt', 'nl', 'zh', 'ja', 'ru', 'uk'];
+  return supportedLocales.includes(lang) ? lang : 'en';
 };
 
 // Get localized placeholders and help text
@@ -65,13 +50,37 @@ const getLocalizedTexts = (locale: 'es' | 'en' | 'auto') => {
       dateFormat: "dd/MM/yyyy" as const,
       buttonText: "dd-mm-aaaa"
     };
-  } else { // auto
-    return {
-      placeholder: "🌍 Try: 'tomorrow' or 'mañana' | 'next friday' or 'próximo viernes'",
-      helpText: "🇺🇸 English: \"today\", \"next week\" • 🇪🇸 Español: \"hoy\", \"próxima semana\" • Press Enter to confirm",
-      dateFormat: "dd/MM/yyyy" as const,
-      buttonText: "Pick a date"
-    };
+  } else { // auto - use browser language
+    const chronoLocale = getChronoLocale();
+    if (chronoLocale === 'es') {
+      return {
+        placeholder: "Ej: 'mañana', 'próximo viernes', 'hace dos semanas'",
+        helpText: "Presiona Enter para confirmar • Soporte automático para español e inglés",
+        dateFormat: "dd/MM/yyyy" as const,
+        buttonText: "Pick a date"
+      };
+    } else if (chronoLocale === 'fr') {
+      return {
+        placeholder: "Ex: 'demain', 'vendredi prochain', 'il y a deux semaines'",
+        helpText: "Appuyez sur Entrée pour confirmer • Support automatique pour français et anglais",
+        dateFormat: "dd/MM/yyyy" as const,
+        buttonText: "Pick a date"
+      };
+    } else if (chronoLocale === 'de') {
+      return {
+        placeholder: "Z.B: 'morgen', 'nächsten Freitag', 'vor zwei Wochen'",
+        helpText: "Drücken Sie Enter zum Bestätigen • Automatische Unterstützung für Deutsch und Englisch",
+        dateFormat: "dd/MM/yyyy" as const,
+        buttonText: "Pick a date"
+      };
+    } else {
+      return {
+        placeholder: "Try 'tomorrow', 'next friday', 'in 2 weeks'",
+        helpText: "Press Enter to confirm • Examples: \"today\", \"2 weeks ago\", \"next friday\", \"last week\"",
+        dateFormat: "PPP" as const,
+        buttonText: "Pick a date"
+      };
+    }
   }
 };
 
@@ -215,27 +224,41 @@ export function NaturalLanguageDatePicker({
           // English-only mode
           parsedDate = chrono.parseDate(inputValue);
         } else if (locale === 'es') {
-          // Spanish-only mode
+          // Spanish-only mode: try chrono.es first, fallback to translation + English
           const translatedInput = translateSpanishToEnglish(inputValue);
           parsedDate = chrono.es.parseDate(inputValue) ||           // 1st: Spanish parser
                       chrono.parseDate(translatedInput) ||          // 2nd: Translated to English  
                       chrono.parseDate(inputValue);                 // 3rd: Original English parser
         } else {
-          // Auto mode: detect language and use intelligent parsing
-          const detectedLang = detectLanguage(inputValue);
+          // Auto mode: use browser language detection (creator's suggestion)
+          const chronoLocale = getChronoLocale();
           
-          if (detectedLang === 'es') {
-            // Detected Spanish: prioritize Spanish parsing
-            const translatedInput = translateSpanishToEnglish(inputValue);
-            parsedDate = chrono.es.parseDate(inputValue) ||         // 1st: Spanish parser
-                        chrono.parseDate(translatedInput) ||        // 2nd: Translated to English
-                        chrono.parseDate(inputValue);               // 3rd: English fallback
+          if (chronoLocale === 'en') {
+            // Browser is English
+            parsedDate = chrono.parseDate(inputValue);
           } else {
-            // Detected English: prioritize English parsing, but still support Spanish
-            const translatedInput = translateSpanishToEnglish(inputValue);
-            parsedDate = chrono.parseDate(inputValue) ||            // 1st: English parser
-                        chrono.es.parseDate(inputValue) ||          // 2nd: Spanish parser
-                        chrono.parseDate(translatedInput);          // 3rd: Translated fallback
+            // Browser is another language: try native parser first, fallback to English
+            try {
+              // Access chrono locale parser safely
+              const localeParser = (chrono as Record<string, { parseDate?: (input: string) => Date | null }>)[chronoLocale];
+              if (localeParser && typeof localeParser.parseDate === 'function') {
+                parsedDate = localeParser.parseDate(inputValue);
+              }
+              
+              // If native parser fails, fallback to English
+              if (!parsedDate) {
+                parsedDate = chrono.parseDate(inputValue);
+              }
+              
+              // For Spanish specifically, add translation fallback for better coverage
+              if (!parsedDate && chronoLocale === 'es') {
+                const translatedInput = translateSpanishToEnglish(inputValue);
+                parsedDate = chrono.parseDate(translatedInput);
+              }
+            } catch {
+              // If locale parser doesn't exist, fallback to English
+              parsedDate = chrono.parseDate(inputValue);
+            }
           }
         }
         
