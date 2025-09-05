@@ -14,6 +14,7 @@ export default function Home() {
     "preview"
   );
   const [hasCopied, setHasCopied] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
 
   const copyToClipboard = async () => {
     await navigator.clipboard.writeText(datePickerCode);
@@ -44,7 +45,7 @@ export default function Home() {
             A good date picker
           </h1>
           <p className="text-lg text-muted-foreground">
-            Because picking dates should not take more than two clicks. Crafted
+            Because picking dates should not take more than two clicks. Now with bilingual natural language support for English and Spanish. Crafted
             with{" "}
             <a
               href="https://ui.shadcn.com/docs/components/date-picker"
@@ -104,8 +105,66 @@ export default function Home() {
           <div className="rounded-lg border">
             {activeTab === "preview" && (
               <div className="p-6">
-                <div className="flex min-h-[400px] items-center justify-center">
-                  <NaturalLanguageDatePicker />
+                <div className="space-y-6">
+                  <div className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
+                    <h3 className="text-lg font-semibold">Bilingual natural language date picker</h3>
+                    <p className="text-center text-muted-foreground max-w-md">
+                      Try typing in English or Spanish - the component automatically detects and understands both languages.
+                    </p>
+                    <NaturalLanguageDatePicker 
+                      value={selectedDate}
+                      onChange={setSelectedDate}
+                      locale="auto"
+                    />
+                    {selectedDate && (
+                      <div className="text-center space-y-2">
+                        <p className="text-sm text-muted-foreground">Selected date:</p>
+                        <p className="text-lg font-medium">{selectedDate.toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="border-t pt-4">
+                    <h4 className="text-sm font-medium mb-3 text-center">Try these expressions:</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;today&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;hoy&quot;</div>
+                      </div>
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;tomorrow&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;mañana&quot;</div>
+                      </div>
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;next friday&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;próximo viernes&quot;</div>
+                      </div>
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;2 weeks ago&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;hace 2 semanas&quot;</div>
+                      </div>
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;last month&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;el mes pasado&quot;</div>
+                      </div>
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;in 3 days&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;dentro de 3 días&quot;</div>
+                      </div>
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;yesterday&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;ayer&quot;</div>
+                      </div>
+                      <div className="text-center p-2 rounded bg-muted/50">
+                        <div className="font-mono">&quot;last week&quot;</div>
+                        <div className="font-mono text-muted-foreground">&quot;la semana pasada&quot;</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -152,10 +211,19 @@ export default function Home() {
                       Ready to add this to your project?
                     </h2>
                     <p className="text-lg text-muted-foreground">
-                      Check out the full documentation and source code on
+                      Now with bilingual natural language support! Check out the full documentation and source code on
                       GitHub. It&apos;s free, MIT-licensed, and ready to make
-                      your users&apos; lives easier.
+                      your users&apos; lives easier in both English and Spanish.
                     </p>
+                    <div className="text-sm text-muted-foreground space-y-2">
+                      <p><strong>New features:</strong></p>
+                      <ul className="list-disc list-inside space-y-1">
+                        <li>Automatic language detection (English/Spanish)</li>
+                        <li>Controlled props for React forms</li>
+                        <li>60+ Spanish expressions supported</li>
+                        <li>Smart parsing with multiple fallback strategies</li>
+                      </ul>
+                    </div>
                   </div>
                   <a
                     href="https://github.com/gulipad/a-good-date-picker"
