@@ -6,6 +6,7 @@ import { CalendarIcon } from "lucide-react";
 import * as chrono from "chrono-node";
 
 import { cn } from "@/lib/utils";
+import { useIsClient } from "@/lib/useIsClient";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -20,13 +21,18 @@ interface NaturalLanguageDatePickerProps {
   onChange?: (date?: Date) => void;
   placeholder?: string;
   className?: string;
-  locale?: 'es' | 'en' | 'auto';
+  locale?: 'es' | 'en' | 'fr' | 'de' | 'auto';
 }
 
 
-// Get chrono locale from browser language
+// Get chrono locale from browser language (client-side only)
 const getChronoLocale = (navigatorLanguage?: string): string => {
-  const browserLang = navigatorLanguage || (typeof navigator !== 'undefined' ? navigator.language : 'en');
+  // During SSR, always return 'en' to avoid hydration mismatch
+  if (typeof window === 'undefined') {
+    return 'en';
+  }
+  
+  const browserLang = navigatorLanguage || navigator.language;
   const lang = browserLang.split('-')[0];
   
   // Supported chrono locales: es, fr, de, pt, en (and others)
@@ -35,7 +41,7 @@ const getChronoLocale = (navigatorLanguage?: string): string => {
 };
 
 // Get localized placeholders and help text
-const getLocalizedTexts = (locale: 'es' | 'en' | 'auto') => {
+const getLocalizedTexts = (locale: 'es' | 'en' | 'fr' | 'de' | 'auto') => {
   if (locale === 'en') {
     return {
       placeholder: "Try 'tomorrow', 'next friday', 'in 2 weeks'",
@@ -50,6 +56,20 @@ const getLocalizedTexts = (locale: 'es' | 'en' | 'auto') => {
       dateFormat: "dd/MM/yyyy" as const,
       buttonText: "dd-mm-aaaa"
     };
+  } else if (locale === 'fr') {
+    return {
+      placeholder: "Ex: 'demain', 'vendredi prochain', 'il y a deux semaines'",
+      helpText: "Appuyez sur Entrée pour confirmer • Exemples: \"aujourd'hui\", \"il y a deux semaines\", \"vendredi prochain\"",
+      dateFormat: "dd/MM/yyyy" as const,
+      buttonText: "Choisir une date"
+    };
+  } else if (locale === 'de') {
+    return {
+      placeholder: "Z.B: 'morgen', 'nächsten Freitag', 'vor zwei Wochen'",
+      helpText: "Drücken Sie Enter zum Bestätigen • Beispiele: \"heute\", \"vor zwei Wochen\", \"nächsten Freitag\"",
+      dateFormat: "dd/MM/yyyy" as const,
+      buttonText: "Datum wählen"
+    };
   } else { // auto - use browser language
     const chronoLocale = getChronoLocale();
     if (chronoLocale === 'es') {
@@ -57,21 +77,21 @@ const getLocalizedTexts = (locale: 'es' | 'en' | 'auto') => {
         placeholder: "Ej: 'mañana', 'próximo viernes', 'hace dos semanas'",
         helpText: "Presiona Enter para confirmar • Soporte automático para español e inglés",
         dateFormat: "dd/MM/yyyy" as const,
-        buttonText: "Pick a date"
+        buttonText: "Seleccionar fecha"
       };
     } else if (chronoLocale === 'fr') {
       return {
         placeholder: "Ex: 'demain', 'vendredi prochain', 'il y a deux semaines'",
         helpText: "Appuyez sur Entrée pour confirmer • Support automatique pour français et anglais",
         dateFormat: "dd/MM/yyyy" as const,
-        buttonText: "Pick a date"
+        buttonText: "Choisir une date"
       };
     } else if (chronoLocale === 'de') {
       return {
         placeholder: "Z.B: 'morgen', 'nächsten Freitag', 'vor zwei Wochen'",
         helpText: "Drücken Sie Enter zum Bestätigen • Automatische Unterstützung für Deutsch und Englisch",
         dateFormat: "dd/MM/yyyy" as const,
-        buttonText: "Pick a date"
+        buttonText: "Datum wählen"
       };
     } else {
       return {
@@ -197,9 +217,11 @@ export function NaturalLanguageDatePicker({
   const [calendarMonth, setCalendarMonth] = React.useState<Date>(value || new Date());
   const [isError, setIsError] = React.useState(false);
   const [isOpen, setIsOpen] = React.useState(false);
+  const isClient = useIsClient();
 
-  // Get localized texts based on locale prop
-  const localizedTexts = getLocalizedTexts(locale);
+  // Get localized texts based on locale prop and client state
+  const effectiveLocale = locale === 'auto' && !isClient ? 'en' : locale;
+  const localizedTexts = getLocalizedTexts(effectiveLocale);
   const finalPlaceholder = placeholder || localizedTexts.placeholder;
 
   // Sync calendar month with external value changes
@@ -229,6 +251,12 @@ export function NaturalLanguageDatePicker({
           parsedDate = chrono.es.parseDate(inputValue) ||           // 1st: Spanish parser
                       chrono.parseDate(translatedInput) ||          // 2nd: Translated to English  
                       chrono.parseDate(inputValue);                 // 3rd: Original English parser
+        } else if (locale === 'fr') {
+          // French-only mode
+          parsedDate = chrono.fr.parseDate(inputValue) || chrono.parseDate(inputValue);
+        } else if (locale === 'de') {
+          // German-only mode
+          parsedDate = chrono.de.parseDate(inputValue) || chrono.parseDate(inputValue);
         } else {
           // Auto mode: use browser language detection (creator's suggestion)
           const chronoLocale = getChronoLocale();
@@ -238,26 +266,31 @@ export function NaturalLanguageDatePicker({
             parsedDate = chrono.parseDate(inputValue);
           } else {
             // Browser is another language: try native parser first, fallback to English
-            try {
-              // Access chrono locale parser safely
-              const localeParser = (chrono as Record<string, { parseDate?: (input: string) => Date | null }>)[chronoLocale];
-              if (localeParser && typeof localeParser.parseDate === 'function') {
-                parsedDate = localeParser.parseDate(inputValue);
-              }
-              
-              // If native parser fails, fallback to English
-              if (!parsedDate) {
+            if (chronoLocale === 'fr') {
+              // French parsing
+              parsedDate = chrono.fr.parseDate(inputValue) || chrono.parseDate(inputValue);
+            } else if (chronoLocale === 'de') {
+              // German parsing
+              parsedDate = chrono.de.parseDate(inputValue) || chrono.parseDate(inputValue);
+            } else if (chronoLocale === 'es') {
+              // Spanish parsing with translation fallback
+              const translatedInput = translateSpanishToEnglish(inputValue);
+              parsedDate = chrono.es.parseDate(inputValue) ||
+                          chrono.parseDate(translatedInput) ||
+                          chrono.parseDate(inputValue);
+            } else {
+              // Other languages: try to access parser dynamically, fallback to English
+              try {
+                const localeParser = (chrono as Record<string, { parseDate?: (input: string) => Date | null }>)[chronoLocale];
+                if (localeParser && typeof localeParser.parseDate === 'function') {
+                  parsedDate = localeParser.parseDate(inputValue);
+                }
+                if (!parsedDate) {
+                  parsedDate = chrono.parseDate(inputValue);
+                }
+              } catch {
                 parsedDate = chrono.parseDate(inputValue);
               }
-              
-              // For Spanish specifically, add translation fallback for better coverage
-              if (!parsedDate && chronoLocale === 'es') {
-                const translatedInput = translateSpanishToEnglish(inputValue);
-                parsedDate = chrono.parseDate(translatedInput);
-              }
-            } catch {
-              // If locale parser doesn't exist, fallback to English
-              parsedDate = chrono.parseDate(inputValue);
             }
           }
         }
@@ -283,6 +316,23 @@ export function NaturalLanguageDatePicker({
       setCalendarMonth(newDate);
     }
   };
+
+  // During SSR or before hydration, show a simplified version
+  if (!isClient && locale === 'auto') {
+    return (
+      <Button
+        variant={"outline"}
+        className={cn(
+          "w-[240px] justify-start text-left font-normal",
+          !value && "text-muted-foreground",
+          className
+        )}
+      >
+        <CalendarIcon className="mr-2 h-4 w-4" />
+        {value ? format(value, "PPP") : <span>Pick a date</span>}
+      </Button>
+    );
+  }
 
   return (
     <>
