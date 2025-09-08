@@ -15,6 +15,7 @@ export default function Home() {
   );
   const [hasCopied, setHasCopied] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [demoLocale, setDemoLocale] = useState<'auto' | 'en' | 'es' | 'fr' | 'de'>('auto');
 
   const copyToClipboard = async () => {
     await navigator.clipboard.writeText(datePickerCode);
@@ -107,14 +108,38 @@ export default function Home() {
               <div className="p-6">
                 <div className="space-y-6">
                   <div className="flex flex-col items-center justify-center min-h-[300px] space-y-4">
-                    <h3 className="text-lg font-semibold">Bilingual natural language date picker</h3>
+                    <h3 className="text-lg font-semibold">Multilingual natural language date picker</h3>
                     <p className="text-center text-muted-foreground max-w-md">
-                      Try typing in English or Spanish - the component automatically detects and understands both languages.
+                      Supports automatic browser detection or manual language selection. Test different languages below!
                     </p>
+                    
+                    {/* Language selector */}
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      {[
+                        { code: 'auto', label: '🌍 Auto', emoji: '🌍' },
+                        { code: 'en', label: '🇺🇸 English', emoji: '🇺🇸' },
+                        { code: 'es', label: '🇪🇸 Español', emoji: '🇪🇸' },
+                        { code: 'fr', label: '🇫🇷 Français', emoji: '🇫🇷' },
+                        { code: 'de', label: '🇩🇪 Deutsch', emoji: '🇩🇪' },
+                      ].map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => setDemoLocale(lang.code as any)}
+                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                            demoLocale === lang.code
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted hover:bg-muted/80'
+                          }`}
+                        >
+                          {lang.label}
+                        </button>
+                      ))}
+                    </div>
+
                     <NaturalLanguageDatePicker 
                       value={selectedDate}
                       onChange={setSelectedDate}
-                      locale="auto"
+                      locale={demoLocale}
                     />
                     {selectedDate && (
                       <div className="text-center space-y-2">
@@ -129,39 +154,43 @@ export default function Home() {
                     )}
                   </div>
                   <div className="border-t pt-4">
-                    <h4 className="text-sm font-medium mb-3 text-center">Try these expressions:</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;today&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;hoy&quot;</div>
+                    <h4 className="text-sm font-medium mb-3 text-center">Try these expressions (change language above!):</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+                      <div className="text-center p-3 rounded bg-muted/50">
+                        <div className="font-semibold mb-2">🇺🇸 English</div>
+                        <div className="space-y-1">
+                          <div className="font-mono">&quot;today&quot;</div>
+                          <div className="font-mono">&quot;tomorrow&quot;</div>
+                          <div className="font-mono">&quot;next friday&quot;</div>
+                          <div className="font-mono">&quot;2 weeks ago&quot;</div>
+                        </div>
                       </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;tomorrow&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;mañana&quot;</div>
+                      <div className="text-center p-3 rounded bg-muted/50">
+                        <div className="font-semibold mb-2">🇪🇸 Español</div>
+                        <div className="space-y-1">
+                          <div className="font-mono">&quot;hoy&quot;</div>
+                          <div className="font-mono">&quot;mañana&quot;</div>
+                          <div className="font-mono">&quot;próximo viernes&quot;</div>
+                          <div className="font-mono">&quot;hace 2 semanas&quot;</div>
+                        </div>
                       </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;next friday&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;próximo viernes&quot;</div>
+                      <div className="text-center p-3 rounded bg-muted/50">
+                        <div className="font-semibold mb-2">🇫🇷 Français</div>
+                        <div className="space-y-1">
+                          <div className="font-mono">&quot;aujourd'hui&quot;</div>
+                          <div className="font-mono">&quot;demain&quot;</div>
+                          <div className="font-mono">&quot;vendredi prochain&quot;</div>
+                          <div className="font-mono">&quot;il y a 2 semaines&quot;</div>
+                        </div>
                       </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;2 weeks ago&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;hace 2 semanas&quot;</div>
-                      </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;last month&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;el mes pasado&quot;</div>
-                      </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;in 3 days&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;dentro de 3 días&quot;</div>
-                      </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;yesterday&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;ayer&quot;</div>
-                      </div>
-                      <div className="text-center p-2 rounded bg-muted/50">
-                        <div className="font-mono">&quot;last week&quot;</div>
-                        <div className="font-mono text-muted-foreground">&quot;la semana pasada&quot;</div>
+                      <div className="text-center p-3 rounded bg-muted/50">
+                        <div className="font-semibold mb-2">🇩🇪 Deutsch</div>
+                        <div className="space-y-1">
+                          <div className="font-mono">&quot;heute&quot;</div>
+                          <div className="font-mono">&quot;morgen&quot;</div>
+                          <div className="font-mono">&quot;nächsten Freitag&quot;</div>
+                          <div className="font-mono">&quot;vor 2 Wochen&quot;</div>
+                        </div>
                       </div>
                     </div>
                   </div>
