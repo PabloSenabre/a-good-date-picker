@@ -1,0 +1,231 @@
+{
+  "english": {
+    "language": "english",
+    "total": 73,
+    "passed": 72,
+    "failed": 1,
+    "categories": {
+      "basic": {
+        "total": 10,
+        "passed": 5,
+        "failed": 0,
+        "failures": []
+      },
+      "weekdays": {
+        "total": 28,
+        "passed": 14,
+        "failed": 0,
+        "failures": []
+      },
+      "relative_past": {
+        "total": 32,
+        "passed": 16,
+        "failed": 0,
+        "failures": []
+      },
+      "relative_future": {
+        "total": 28,
+        "passed": 14,
+        "failed": 0,
+        "failures": []
+      },
+      "specific_past": {
+        "total": 18,
+        "passed": 9,
+        "failed": 0,
+        "failures": []
+      },
+      "specific_future": {
+        "total": 18,
+        "passed": 9,
+        "failed": 0,
+        "failures": []
+      },
+      "complex": {
+        "total": 12,
+        "passed": 5,
+        "failed": 1,
+        "failures": [
+          "first day of the month"
+        ]
+      }
+    }
+  },
+  "spanish": {
+    "language": "spanish",
+    "total": 80,
+    "passed": 50,
+    "failed": 30,
+    "categories": {
+      "basic": {
+        "total": 10,
+        "passed": 4,
+        "failed": 1,
+        "failures": [
+          "anteayer"
+        ]
+      },
+      "weekdays": {
+        "total": 28,
+        "passed": 14,
+        "failed": 0,
+        "failures": []
+      },
+      "relative_past": {
+        "total": 32,
+        "passed": 0,
+        "failed": 16,
+        "failures": [
+          "hace una hora",
+          "hace dos horas",
+          "hace tres horas",
+          "hace un día",
+          "hace dos días",
+          "hace tres días",
+          "hace una semana",
+          "hace dos semanas",
+          "hace tres semanas",
+          "hace cuatro semanas",
+          "hace un mes",
+          "hace dos meses",
+          "hace tres meses",
+          "hace seis meses",
+          "hace un año",
+          "hace dos años"
+        ]
+      },
+      "relative_future": {
+        "total": 36,
+        "passed": 18,
+        "failed": 0,
+        "failures": []
+      },
+      "specific_past": {
+        "total": 18,
+        "passed": 6,
+        "failed": 3,
+        "failures": [
+          "la semana pasada",
+          "el mes pasado",
+          "el año pasado"
+        ]
+      },
+      "specific_future": {
+        "total": 24,
+        "passed": 8,
+        "failed": 4,
+        "failures": [
+          "la próxima semana",
+          "el próximo mes",
+          "el próximo año",
+          "la semana que viene"
+        ]
+      },
+      "complex": {
+        "total": 12,
+        "passed": 0,
+        "failed": 6,
+        "failures": [
+          "el primer día del mes",
+          "el último día del mes",
+          "hace exactamente una semana",
+          "dentro de exactamente un mes",
+          "el fin de semana pasado",
+          "el próximo fin de semana"
+        ]
+      }
+    }
+  },
+  "french": {
+    "language": "french",
+    "total": 52,
+    "passed": 50,
+    "failed": 2,
+    "categories": {
+      "basic": {
+        "total": 10,
+        "passed": 5,
+        "failed": 0,
+        "failures": []
+      },
+      "weekdays": {
+        "total": 14,
+        "passed": 7,
+        "failed": 0,
+        "failures": []
+      },
+      "relative_past": {
+        "total": 28,
+        "passed": 13,
+        "failed": 1,
+        "failures": [
+          "il y a un an"
+        ]
+      },
+      "relative_future": {
+        "total": 28,
+        "passed": 13,
+        "failed": 1,
+        "failures": [
+          "dans un an"
+        ]
+      },
+      "specific_past": {
+        "total": 12,
+        "passed": 6,
+        "failed": 0,
+        "failures": []
+      },
+      "specific_future": {
+        "total": 12,
+        "passed": 6,
+        "failed": 0,
+        "failures": []
+      }
+    }
+  },
+  "german": {
+    "language": "german",
+    "total": 52,
+    "passed": 52,
+    "failed": 0,
+    "categories": {
+      "basic": {
+        "total": 10,
+        "passed": 5,
+        "failed": 0,
+        "failures": []
+      },
+      "weekdays": {
+        "total": 14,
+        "passed": 7,
+        "failed": 0,
+        "failures": []
+      },
+      "relative_past": {
+        "total": 28,
+        "passed": 14,
+        "failed": 0,
+        "failures": []
+      },
+      "relative_future": {
+        "total": 28,
+        "passed": 14,
+        "failed": 0,
+        "failures": []
+      },
+      "specific_past": {
+        "total": 12,
+        "passed": 6,
+        "failed": 0,
+        "failures": []
+      },
+      "specific_future": {
+        "total": 12,
+        "passed": 6,
+        "failed": 0,
+        "failures": []
+      }
+    }
+  }
+}
